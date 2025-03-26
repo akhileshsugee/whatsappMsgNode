@@ -17,21 +17,61 @@ const twilioNumber = process.env.TWILIO_NUMBER;
 const client = twilio(twilioSid, twilioToken);
 
 // Business plan responses
-const welcomeMessage = `
-🌾 Welcome to Sugee.io! 🌾
+// const welcomeMessage = `
+// 🌾 Welcome to Sugee.io! 🌾
 
-We offer the following services:
-1. Apply for an Agriculture Loan Online
-2. Customer Support & Assistance
+// We offer the following services:
+// 1. Apply for an Agriculture Loan Online
+// 2. Customer Support & Assistance
 
-Please reply with 1 or 2 to proceed.
-`;
+// Please reply with 1 or 2 to proceed.
+// `;
+
+// const responses = {
+//     '1': '🌱 Agriculture Loan: Apply easily for crop loans with quick approval and minimal paperwork. Would you like to proceed?',
+//     '2': '🤝 Support & Help: Our team is here to assist you with any queries or issues. How can we help you today?',
+//     'default': '❌ Invalid option. Please reply with 1 to apply for a loan or 2 for support.'
+// };
+
+
+// Business plan responses
+const welcomeMessage = {
+    contentType: 'application/json',
+    content: {
+        type: 'interactive',
+        interactive: {
+            type: 'button',
+            body: {
+                text: '🌾 Welcome to Sugee.io! 🌾\n\nWe offer the following services:'
+            },
+            action: {
+                buttons: [
+                    {
+                        type: 'reply',
+                        reply: {
+                            id: '1',
+                            title: 'Apply for Agriculture Loan'
+                        }
+                    },
+                    {
+                        type: 'reply',
+                        reply: {
+                            id: '2',
+                            title: 'Customer Support & Assistance'
+                        }
+                    }
+                ]
+            }
+        }
+    }
+};
 
 const responses = {
     '1': '🌱 Agriculture Loan: Apply easily for crop loans with quick approval and minimal paperwork. Would you like to proceed?',
     '2': '🤝 Support & Help: Our team is here to assist you with any queries or issues. How can we help you today?',
-    'default': '❌ Invalid option. Please reply with 1 to apply for a loan or 2 for support.'
+    'default': '❌ Invalid option. Please select a valid option using the buttons.'
 };
+
 
 // Middleware
 app.use(bodyParser.urlencoded({ extended: false }));
