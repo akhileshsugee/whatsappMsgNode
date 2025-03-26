@@ -7,7 +7,7 @@ const fs = require('fs');
 const app = express();
 
 require('dotenv').config();
-const port = process.env.PORT || 3000; 
+const port = process.env.PORT || 3000;
 
 // Twilio credentials
 const twilioSid = process.env.TWILIO_SID;
@@ -51,53 +51,53 @@ const welcomeMessage = {
 const responses = {
     '1': '🌱 Agriculture Loan: Apply easily for crop loans with quick approval and minimal paperwork. Would you like to proceed?',
     '2': '🤝 Support & Help: Our team is here to assist you with any queries or issues. How can we help you today?',
-    'default': '❌ Invalid option. Please select a valid option using the buttons.'
+    'default': '❌ Invalid option. Please use the provided buttons to select an option.'
 };
 
+// Middleware
 app.use(bodyParser.urlencoded({ extended: false }));
 
+// Utility function to log messages
 const logMessage = (message) => {
     fs.appendFileSync('debug.log', `${new Date().toISOString()} - ${message}\n`);
 };
 
-const sendMessage = async (to, content) => {
+// Send WhatsApp message
+const sendMessage = async (to, body, isInteractive = false) => {
     try {
         const messageData = {
             from: `whatsapp:${twilioNumber}`,
             to: `whatsapp:${to}`
         };
 
-        // If content is an object (interactive), send as media
-        if (typeof content === 'object') {
-            messageData.contentType = content.contentType;
-            messageData.content = JSON.stringify(content.content);
+        if (isInteractive) {
+            messageData.content = body.content;
         } else {
-            messageData.body = content; // Otherwise, send as plain text
+            messageData.body = body;
         }
 
         const message = await client.messages.create(messageData);
-        logMessage(`Message sent to ${to}: ${JSON.stringify(content)}`);
+        logMessage(`Message sent to ${to}: ${isInteractive ? JSON.stringify(body) : body}`);
     } catch (error) {
         logMessage(`Error sending message: ${error.message}`);
     }
 };
 
-app.post('/webhook', async (req, res) => {
+// Handle incoming messages
+app.post('/webhook', (req, res) => {
     const incomingMsg = (req.body.Body || '').trim().toLowerCase();
     const sender = req.body.From || '';
 
     logMessage(`Received: '${incomingMsg}' from ${sender}`);
 
-    let reply = responses.default;
-
-    if (incomingMsg === 'hi') {
-        reply = welcomeMessage;
-    } else if (responses[incomingMsg]) {
-        reply = responses[incomingMsg];
-    }
-
     if (sender && sender !== `whatsapp:${twilioNumber}`) {
-        await sendMessage(sender.replace('whatsapp:', ''), reply);
+        if (incomingMsg === 'hi') {
+            sendMessage(sender.replace('whatsapp:', ''), welcomeMessage, true);
+        } else if (responses[incomingMsg]) {
+            sendMessage(sender.replace('whatsapp:', ''), responses[incomingMsg]);
+        } else {
+            sendMessage(sender.replace('whatsapp:', ''), responses.default);
+        }
     } else {
         logMessage('Skipping reply: Invalid sender or self-message');
     }
