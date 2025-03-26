@@ -1,0 +1,31 @@
+# Node.js dependencies
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Environment files
+.env
+
+# Logs
+logs/
+*.log
+debug.log
+
+# IDE/Editor settings
+.vscode/
+.idea/
+
+# Cache and output
+coverage/
+dist/
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.swp
+
+# Twilio specific
+.twilio-cli/
