@@ -30,34 +30,13 @@ const sendInteractiveMessage = async (to) => {
         await client.messages.create({
             from: `whatsapp:${twilioNumber}`,
             to: `whatsapp:${to}`,
-            contentType: 'application/json',
-            content: {
-                type: 'interactive',
-                interactive: {
-                    type: 'button',
-                    body: {
-                        text: '🌾 Welcome to Sugee.io! 🌾\n\nWe offer the following services:'
-                    },
-                    action: {
-                        buttons: [
-                            {
-                                type: 'reply',
-                                reply: {
-                                    id: '1',
-                                    title: 'Apply for Agriculture Loan'
-                                }
-                            },
-                            {
-                                type: 'reply',
-                                reply: {
-                                    id: '2',
-                                    title: 'Customer Support & Assistance'
-                                }
-                            }
-                        ]
-                    }
-                }
-            }
+            contentSid: 'YOUR_CONTENT_SID', // Use Content SID from Twilio
+            contentVariables: JSON.stringify({
+                title: '🌾 Welcome to Sugee.io!',
+                body: 'We offer the following services:',
+                button1: 'Apply for Agriculture Loan',
+                button2: 'Customer Support & Assistance'
+            })
         });
         logMessage(`Interactive message sent to ${to}`);
     } catch (error) {
