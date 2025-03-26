@@ -3,9 +3,10 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const twilio = require('twilio');
 const fs = require('fs');
-require('dotenv').config();
 
 const app = express();
+
+require('dotenv').config();
 const port = process.env.PORT;
 
 // Twilio credentials
@@ -13,10 +14,25 @@ const twilioSid = process.env.TWILIO_SID;
 const twilioToken = process.env.TWILIO_TOKEN;
 const twilioNumber = process.env.TWILIO_NUMBER;
 
-// Ensure you add your Twilio Content SID from approved templates
-const contentSid = process.env.TWILIO_CONTENT_SID;
-
 const client = twilio(twilioSid, twilioToken);
+
+// Business plan responses
+const welcomeMessage = `
+🌾 Welcome to Sugee.io! 🌾
+
+We offer the following services:
+1. Apply for an Agriculture Loan Online
+2. Customer Support & Assistance
+
+Please reply with 1 or 2 to proceed.
+`;
+
+const responses = {
+    '1': '🌱 Agriculture Loan: Apply easily for crop loans with quick approval and minimal paperwork. Would you like to proceed?',
+    '2': '🤝 Support & Help: Our team is here to assist you with any queries or issues. How can we help you today?',
+    'default': '❌ Invalid option. Please reply with 1 to apply for a loan or 2 for support.'
+};
+
 
 // Middleware
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -26,28 +42,10 @@ const logMessage = (message) => {
     fs.appendFileSync('debug.log', `${new Date().toISOString()} - ${message}\n`);
 };
 
-// Send WhatsApp interactive message with buttons
-const sendInteractiveMessage = async (to) => {
-    try {
-        await client.messages.create({
-            from: `whatsapp:${twilioNumber}`,
-            to: `whatsapp:${to}`,
-            contentSid: contentSid,
-            contentVariables: JSON.stringify({
-                button1: 'Apply for Agriculture Loan',
-                button2: 'Customer Support & Assistance'
-            })
-        });
-        logMessage(`Interactive message sent to ${to}`);
-    } catch (error) {
-        logMessage(`Error sending interactive message: ${error.message}`);
-    }
-};
-
-// Send plain WhatsApp message
+// Send WhatsApp message
 const sendMessage = async (to, body) => {
     try {
-        await client.messages.create({
+        const message = await client.messages.create({
             from: `whatsapp:${twilioNumber}`,
             to: `whatsapp:${to}`,
             body
@@ -58,13 +56,6 @@ const sendMessage = async (to, body) => {
     }
 };
 
-// Business plan responses
-const responses = {
-    'loan': '🌱 Agriculture Loan: Apply easily for crop loans with quick approval and minimal paperwork. Would you like to proceed?',
-    'support': '🤝 Support & Help: Our team is here to assist you with any queries or issues. How can we help you today?',
-    'default': '❌ Invalid option. Please select a valid option using the buttons.'
-};
-
 // Handle incoming messages
 app.post('/webhook', (req, res) => {
     const incomingMsg = (req.body.Body || '').trim().toLowerCase();
@@ -72,21 +63,17 @@ app.post('/webhook', (req, res) => {
 
     logMessage(`Received: '${incomingMsg}' from ${sender}`);
 
-    if (!sender.startsWith('whatsapp:')) {
-        logMessage('Invalid sender - ignoring message');
-        return res.sendStatus(200);
+    let reply = responses.default;
+    if (incomingMsg === 'hi') {
+        reply = welcomeMessage;
+    } else if (responses[incomingMsg]) {
+        reply = responses[incomingMsg];
     }
 
-    const senderNumber = sender.replace('whatsapp:', '');
-
-    if (incomingMsg === 'hi') {
-        sendInteractiveMessage(senderNumber);
-    } else if (incomingMsg === '1') {
-        sendMessage(senderNumber, responses['loan']);
-    } else if (incomingMsg === '2') {
-        sendMessage(senderNumber, responses['support']);
+    if (sender && sender !== `whatsapp:${twilioNumber}`) {
+        sendMessage(sender.replace('whatsapp:', ''), reply);
     } else {
-        sendMessage(senderNumber, responses['default']);
+        logMessage('Skipping reply: Invalid sender or self-message');
     }
 
     res.set('Content-Type', 'text/xml');
@@ -95,5 +82,5 @@ app.post('/webhook', (req, res) => {
 
 // Start server
 app.listen(port, () => {
-    console.log(`🚀 WhatsApp bot running on port ${port}`);
+    console.log(`WhatsApp bot running on port ${port}`);
 });
