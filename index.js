@@ -18,15 +18,19 @@ const client = twilio(twilioSid, twilioToken);
 
 // Business plan responses
 const welcomeMessage = `
-Hi! Welcome to Sugee.io  Here's our Faclity:
-1. Apply agriculture loan online 
-2. Support and Help
+🌾 Welcome to Sugee.io! 🌾
+
+We offer the following services:
+1. Apply for an Agriculture Loan Online
+2. Customer Support & Assistance
+
+Please reply with 1 or 2 to proceed.
 `;
 
 const responses = {
-    '1': 'Apply CROP Lone',
-    '2': 'Apply Nornam Lone',
-    'default': 'Sorry, please type 1 or 2 to choose a plan!'
+    '1': '🌱 Agriculture Loan: Apply easily for crop loans with quick approval and minimal paperwork. Would you like to proceed?',
+    '2': '🤝 Support & Help: Our team is here to assist you with any queries or issues. How can we help you today?',
+    'default': '❌ Invalid option. Please reply with 1 to apply for a loan or 2 for support.'
 };
 
 // Middleware
