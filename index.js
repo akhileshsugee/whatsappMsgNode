@@ -9,14 +9,12 @@ const app = express();
 require('dotenv').config();
 const port = process.env.PORT;
 
-// Twilio credentials
 const twilioSid = process.env.TWILIO_SID;
 const twilioToken = process.env.TWILIO_TOKEN;
 const twilioNumber = process.env.TWILIO_NUMBER;
 
 const client = twilio(twilioSid, twilioToken);
 
-// Business plan responses
 const welcomeMessage = `
 🌾 Welcome to Sugee.io! 🌾
 
@@ -35,15 +33,23 @@ Please reply with a number (1 to 9) to proceed.
 `;
 
 const responses = {
-    '1':  `🌱 Agriculture Loan: Select the type of loan you want to apply for:
+    '1': `🌱 Agriculture Loan: Select the type of loan you want to apply for:
     1. KCC (Kisan Credit Card)
     2. Crop Loan
     3. MT/LT (Medium/Long Term Loan)
 
 Please reply with 1, 2, or 3.`,
+
     '1.1': '💳 KCC Loan: How much amount do you want to apply for? Please enter the amount.',
     '1.2': '🌾 Crop Loan: How much amount do you want to apply for? Please enter the amount.',
     '1.3': '📊 MT/LT Loan: How much amount do you want to apply for? Please enter the amount.',
+
+    // Dynamic response after amount is entered
+    '1.1.amount': '✅ Thank you for applying for a KCC Loan. Our team will contact you soon.',
+    '1.2.amount': '✅ Thank you for applying for a Crop Loan. Our team will contact you soon.',
+    '1.3.amount': '✅ Thank you for applying for an MT/LT Loan. Our team will contact you soon.',
+
+    // Other services remain the same
     '2': '🚜 Spray Booking: Book agricultural spray services quickly and efficiently. Would you like to continue?',
     '3': '🛡️ Insurance: Secure your crops with our comprehensive agricultural insurance plans. Would you like to proceed?',
     '4': '🧪 Soil Testing: Get accurate soil testing services to optimize your crop yield. Would you like to continue?',
@@ -52,20 +58,19 @@ Please reply with 1, 2, or 3.`,
     '7': '📋 Schemes: Explore government and private agricultural schemes to maximize your benefits. Would you like to proceed?',
     '8': '🔍 Other Services: Explore additional agricultural services tailored to your needs. How can we assist you?',
     '9': '🤝 Support & Help: Our team is here to assist you with any queries or issues. How can we help you today?',
+
     'default': '❌ Invalid option. Please reply with a number between 1 and 9 to select a service.'
 };
 
+
 let userState = {};
 
-// Middleware
 app.use(bodyParser.urlencoded({ extended: false }));
 
-// Utility function to log messages
 const logMessage = (message) => {
     fs.appendFileSync('debug.log', `${new Date().toISOString()} - ${message}\n`);
 };
 
-// Send WhatsApp message
 const sendMessage = async (to, body) => {
     try {
         const message = await client.messages.create({
@@ -79,7 +84,6 @@ const sendMessage = async (to, body) => {
     }
 };
 
-// Handle incoming messages
 app.post('/webhook', (req, res) => {
     const incomingMsg = (req.body.Body || '').trim().toLowerCase();
     const sender = req.body.From || '';
@@ -112,7 +116,6 @@ app.post('/webhook', (req, res) => {
     res.send('<?xml version="1.0" encoding="UTF-8"?><Response></Response>');
 });
 
-// Start server
 app.listen(port, () => {
     console.log(`WhatsApp bot running on port ${port}`);
 });
