@@ -44,12 +44,10 @@ Please reply with 1, 2, or 3.`,
     '1.2': '🌾 Crop Loan: How much amount do you want to apply for? Please enter the amount.',
     '1.3': '📊 MT/LT Loan: How much amount do you want to apply for? Please enter the amount.',
 
-    // Dynamic response after amount is entered
     '1.1.amount': '✅ Thank you for applying for a KCC Loan. Our team will contact you soon.',
     '1.2.amount': '✅ Thank you for applying for a Crop Loan. Our team will contact you soon.',
     '1.3.amount': '✅ Thank you for applying for an MT/LT Loan. Our team will contact you soon.',
 
-    // Other services remain the same
     '2': '🚜 Spray Booking: Book agricultural spray services quickly and efficiently. Would you like to continue?',
     '3': '🛡️ Insurance: Secure your crops with our comprehensive agricultural insurance plans. Would you like to proceed?',
     '4': '🧪 Soil Testing: Get accurate soil testing services to optimize your crop yield. Would you like to continue?',
